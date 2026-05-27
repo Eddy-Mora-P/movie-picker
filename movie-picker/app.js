@@ -1,33 +1,56 @@
-let peliculas = JSON.parse(localStorage.getItem("peliculas")) || [];
+const firebaseConfig = {
+  apiKey: "AIzaSyAbnfQNxED3PJxX56xRwpDuZQsoSB5Auzc",
+  authDomain: "movie-picker-417c4.firebaseapp.com",
+  projectId: "movie-picker-417c4",
+  storageBucket: "movie-picker-417c4.appspot.com",
+  messagingSenderId: "721484429672",
+  appId: "1:721484429672:web:f43742c5a43437f9afbedd"
+};
 
-mostrarPeliculas();
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const coleccion = db.collection("peliculas");
+
+let peliculas = [];
+
+function cargarPeliculas() {
+
+    coleccion.onSnapshot((snapshot) => {
+
+        peliculas = [];
+
+        snapshot.forEach(doc => {
+
+            peliculas.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+        mostrarPeliculas();
+
+    });
+
+}
 
 function agregarPelicula() {
 
     const nombre = document.getElementById("nombre").value;
-
     const anio = document.getElementById("anio").value;
-
     const productor = document.getElementById("productor").value;
 
-    if (nombre.trim() === "" || anio.trim() === "") {
-        return;
-    }
+    if (nombre.trim() === "" || anio.trim() === "") return;
 
-    const pelicula = {
-        id: Date.now(),
+    coleccion.add({
         nombre,
         anio,
         productor
-    };
-
-    peliculas.push(pelicula);
-
-    guardarDatos();
-
-    mostrarPeliculas();
+    });
 
     limpiarFormulario();
+
 }
 
 function mostrarPeliculas() {
@@ -43,9 +66,13 @@ function mostrarPeliculas() {
 
                 <div class="pelicula-card">
 
-                    <h5>${pelicula.nombre}</h5>
+                    <h5>
+                        ${pelicula.nombre}
+                    </h5>
 
-                    <p>Año: ${pelicula.anio}</p>
+                    <p>
+                        Año: ${pelicula.anio}
+                    </p>
 
                     <p>
                         Productor:
@@ -53,7 +80,7 @@ function mostrarPeliculas() {
                     </p>
 
                     <button class="btn btn-danger btn-sm"
-                            onclick="eliminarPelicula(${pelicula.id})">
+                            onclick="eliminarPelicula('${pelicula.id}')">
 
                         Eliminar
 
@@ -63,37 +90,28 @@ function mostrarPeliculas() {
 
             </div>
         `;
+
     });
+
 }
 
 function eliminarPelicula(id) {
 
-    peliculas = peliculas.filter(
-        (pelicula) => pelicula.id !== id
-    );
+    coleccion.doc(id).delete();
 
-    guardarDatos();
-
-    mostrarPeliculas();
 }
 
 function escogerPelicula() {
 
-    if (peliculas.length === 0) {
-        return;
-    }
+    if (peliculas.length === 0) return;
 
-    const indice = Math.floor(
-        Math.random() * peliculas.length
-    );
+    const indice = Math.floor(Math.random() * peliculas.length);
 
     const pelicula = peliculas[indice];
 
-    const resultado =
-        document.getElementById("resultado");
+    document.getElementById("resultado").innerHTML = `
 
-    resultado.innerHTML = `
-        <div class="card p-3">
+        <div class="card p-3 resultado-card">
 
             <h3>
                 Película seleccionada
@@ -112,45 +130,49 @@ function escogerPelicula() {
                 ${pelicula.productor || "No especificado"}
             </p>
 
-            <button class="btn btn-warning"
-                    onclick="confirmarVista(${pelicula.id})">
+            <div class="d-flex gap-2 mt-3">
 
-                Confirmar verla
+                <button class="btn btn-warning flex-fill"
+                        onclick="confirmarVista('${pelicula.id}')">
 
-            </button>
+                    Confirmar verla
+
+                </button>
+
+                <button class="btn btn-secondary flex-fill"
+                        onclick="cancelarSeleccion()">
+
+                    Cancelar
+
+                </button>
+
+            </div>
 
         </div>
+
     `;
+
 }
 
 function confirmarVista(id) {
 
-    peliculas = peliculas.filter(
-        (pelicula) => pelicula.id !== id
-    );
+    coleccion.doc(id).delete();
 
-    guardarDatos();
+    document.getElementById("resultado").innerHTML = "";
 
-    mostrarPeliculas();
-
-    document.getElementById(
-        "resultado"
-    ).innerHTML = "";
 }
+function cancelarSeleccion() {
 
-function guardarDatos() {
+    document.getElementById("resultado").innerHTML = "";
 
-    localStorage.setItem(
-        "peliculas",
-        JSON.stringify(peliculas)
-    );
 }
 
 function limpiarFormulario() {
 
     document.getElementById("nombre").value = "";
-
     document.getElementById("anio").value = "";
-
     document.getElementById("productor").value = "";
+
 }
+
+cargarPeliculas();

@@ -24,3 +24,25 @@ input {
 input::placeholder {
     color: #aaa !important;
 }
+
+    .titulo-agregar {
+        color: #dc3545;
+    }
+
+.card.resultado-card {
+    background-color: #1e1e2f;
+    color: #f0f0f0;
+    border-left: 5px solid #e1c05d;
+}
+
+.resultado-card {
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+    color: white;
+}
+
+.resultado-card h3,
+.resultado-card h4,
+.resultado-card p {
+    color: white;
+}
