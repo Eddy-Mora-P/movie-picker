@@ -35,6 +35,16 @@ function cargarPeliculas() {
 
 }
 
+function buscarPeliculas() {
+    const textoBusqueda = document.getElementById("buscar").value.toLowerCase().trim();
+
+    const peliculasFiltradas = peliculas.filter((pelicula) => {
+        return pelicula.nombre.toLowerCase().includes(textoBusqueda);
+    });
+
+    mostrarPeliculas(peliculasFiltradas);
+}
+
 function agregarPelicula() {
 
     const nombre = document.getElementById("nombre").value;
@@ -53,13 +63,13 @@ function agregarPelicula() {
 
 }
 
-function mostrarPeliculas() {
+function mostrarPeliculas(lista = peliculas) {
 
     const contenedor = document.getElementById("listaPeliculas");
 
     contenedor.innerHTML = "";
 
-    peliculas.forEach((pelicula) => {
+    lista.forEach((pelicula) => {
 
         contenedor.innerHTML += `
             <div class="col-md-4">
